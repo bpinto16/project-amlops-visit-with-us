@@ -137,12 +137,14 @@ model_pipeline = make_pipeline(preprocessor, xgb_model)
 
 # Grid covers the most impactful XGBoost knobs for this dataset size
 param_grid = {
-    "xgbclassifier__n_estimators"      : [50, 100, 150],
-    "xgbclassifier__max_depth"         : [2, 3, 4],
-    "xgbclassifier__learning_rate"     : [0.01, 0.05, 0.1],
+    "xgbclassifier__n_estimators"      : [100, 150, 200],
+    "xgbclassifier__max_depth"         : [3, 4, 5],
+    "xgbclassifier__learning_rate"     : [0.01, 0.05],
     "xgbclassifier__colsample_bytree"  : [0.5, 0.7],
     "xgbclassifier__colsample_bylevel" : [0.5, 0.7],
-    "xgbclassifier__reg_lambda"        : [1.5, 3.0],
+    "xgbclassifier__reg_lambda"        : [1.0, 1.5],
+    "xgbclassifier__min_child_weight"  : [3, 5],
+    "xgbclassifier__subsample"         : [0.8, 0.9],
 }
 
 # CROSS-VALIDATED GRID SEARCH
