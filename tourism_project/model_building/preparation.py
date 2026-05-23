@@ -31,7 +31,7 @@ print("\n--Data Cleaning.--")
 
 # Initial Shape
 print(f"Original Dataset Shape: {df.shape}")
-print(f"Columns:", {df.columns.tolist()})
+print("Columns:", df.columns.tolist())
 df.head(3)
 
 
