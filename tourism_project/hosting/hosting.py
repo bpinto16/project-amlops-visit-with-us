@@ -1,7 +1,7 @@
 from huggingface_hub import HfApi
 import os
 
-# Constants 
+# Constants
 HF_MODEL_REPO    = "bpinto16/wellness-tourism-model"
 
 api = HfApi(token=os.getenv("HF_TOKEN"))

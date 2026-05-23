@@ -3,12 +3,12 @@ import joblib
 import pandas as pd
 import streamlit as st
 from huggingface_hub import hf_hub_download
- 
+
 st.set_page_config(
     page_title="Wellness Tourism Package — Purchase Predictor",
     layout="wide",
 )
- 
+
 
 @st.cache_resource
 def load_model():
@@ -19,7 +19,7 @@ def load_model():
     return joblib.load(model_path)
 
 model = load_model()
- 
+
 
 st.title("Wellness Tourism Package — Purchase Predictor")
 st.write(
@@ -30,12 +30,12 @@ st.write(
     """
 )
 st.divider()
- 
+
 
 # INPUT FORM
 st.subheader("Customer details")
 col1, col2, col3 = st.columns(3)
- 
+
 with col1:
     age = st.slider(
         "Age", min_value=18, max_value=61, value=36,
@@ -50,7 +50,7 @@ with col1:
     occupation = st.selectbox(
         "Occupation", options=["Large Business", "Salaried", "Small Business"]
     )
- 
+
 with col2:
     designation = st.selectbox(
         "Designation",
@@ -72,7 +72,7 @@ with col2:
         options=["Company Invited", "Self Enquiry"],
         help="How the customer was contacted"
     )
- 
+
 with col3:
     passport = st.selectbox(
         "Holds passport?", options=["Yes", "No"],
@@ -90,11 +90,11 @@ with col3:
         "Children visiting (under 5)",
         options=[0, 1, 2, 3]
     )
- 
+
 st.divider()
 st.subheader("Travel profile")
 col4, col5 = st.columns(2)
- 
+
 with col4:
     number_of_trips = st.slider(
         "Average trips per year", min_value=1, max_value=7, value=3,
@@ -103,18 +103,18 @@ with col4:
     preferred_property_star = st.selectbox(
         "Preferred hotel star rating", options=[3, 4, 5]
     )
- 
+
 with col5:
     product_pitched = st.selectbox(
         "Product pitched",
         options=["Basic", "Deluxe", "King", "Standard", "Super Deluxe"],
         help="The tourism package pitched to this customer"
     )
- 
+
 st.divider()
 st.subheader("Sales interaction")
 col6, col7 = st.columns(2)
- 
+
 with col6:
     duration_of_pitch = st.slider(
         "Duration of pitch (minutes)", min_value=5, max_value=127, value=15
@@ -122,20 +122,20 @@ with col6:
     number_of_followups = st.selectbox(
         "Number of follow-ups", options=[1, 2, 3, 4, 5, 6]
     )
- 
+
 with col7:
     pitch_satisfaction_score = st.selectbox(
         "Pitch satisfaction score (1=low, 5=high)", options=[1, 2, 3, 4, 5]
     )
- 
+
 st.divider()
- 
+
 
 # PREDICTION
 THRESHOLD = 0.40   # matches classification threshold used in train.py
- 
+
 if st.button("Predict Purchase Likelihood", use_container_width=True):
- 
+
     #  Build raw input DataFrame
     raw_input = pd.DataFrame([{
         "Age"                      : age,
@@ -157,15 +157,15 @@ if st.button("Predict Purchase Likelihood", use_container_width=True):
         "Designation"              : designation,
         "MonthlyIncome_log"        : np.log1p(monthly_income),  # match preparation.py transform
     }])
- 
+
     purchase_probability = model.predict_proba(raw_input)[0, 1]
     will_purchase = purchase_probability >= THRESHOLD
- 
+
     # Display result
     st.subheader("Prediction result")
- 
+
     result_col1, result_col2 = st.columns(2)
- 
+
     with result_col1:
         if will_purchase:
             st.success(
@@ -179,7 +179,7 @@ if st.button("Predict Purchase Likelihood", use_container_width=True):
                 f"This customer has a **{purchase_probability:.1%}** probability "
                 f"of buying the Wellness Tourism Package."
             )
- 
+
     with result_col2:
         st.metric(
             label="Purchase probability",
@@ -189,11 +189,11 @@ if st.button("Predict Purchase Likelihood", use_container_width=True):
         st.caption(
             f"Decision threshold: {THRESHOLD:.0%}"
         )
- 
-    # Interpretation guide 
+
+    # Interpretation guide
     st.divider()
     st.subheader("How to use this result")
- 
+
     if will_purchase:
         st.markdown(
             """

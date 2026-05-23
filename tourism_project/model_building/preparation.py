@@ -21,7 +21,7 @@ TARGET_COL = "ProdTaken"
 
 # Columns to drop before any processing
 DROP_COLS = ["Unnamed: 0", "CustomerID"]
- 
+
 # Data Load
 df = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
@@ -47,11 +47,11 @@ if missing_cols.empty:
     print("No missing values found — no action needed.")
 else:
     print("Missing per column:\n", missing_cols.to_string())
- 
+
 df = df.dropna()
 print(f"Shape after dropna : {df.shape}")
- 
- 
+
+
 # DUPLICATE ROW CHECK
 dup_count = df.duplicated().sum()
 print(f"Duplicates found : {dup_count}")
@@ -64,7 +64,7 @@ n = (df["Gender"] == "Fe Male").sum()
 df["Gender"] = df["Gender"].replace("Fe Male", "Female")
 print(f"Gender: 'Fe Male' to 'Female' ({n} rows fixed)")
 print(f"Unique Gender now: {sorted(df['Gender'].unique())}")
- 
+
 # MaritalStatus semantic duplicate
 n = (df["MaritalStatus"] == "Unmarried").sum()
 df["MaritalStatus"] = df["MaritalStatus"].replace("Unmarried", "Single")
@@ -84,7 +84,7 @@ print(
     f"MonthlyIncome: log1p transform to 'MonthlyIncome_log'"
     f"[{df['MonthlyIncome_log'].min():.3f}, {df['MonthlyIncome_log'].max():.3f}]"
 )
- 
+
 # Cap 95 percentile prevents extreme values distorting the scaler's mean/std during fit.
 trips_cap = df["NumberOfTrips"].quantile(0.95)
 n_clipped = (df["NumberOfTrips"] > trips_cap).sum()
@@ -106,14 +106,14 @@ Xtrain, Xtest, ytrain, ytest = train_test_split(
 )
 print(f"Xtrain : {Xtrain.shape}   ytrain : {ytrain.shape}")
 print(f"Xtest  : {Xtest.shape}    ytest  : {ytest.shape}")
- 
+
 output_files = {
     "Xtrain.csv"          : Xtrain,
     "Xtest.csv"           : Xtest,
     "ytrain.csv"          : ytrain.reset_index(drop=True).to_frame(),
     "ytest.csv"           : ytest.reset_index(drop=True).to_frame(),
 }
- 
+
 for filename, data in output_files.items():
     data.to_csv(filename, index=False)
     print(f"  Saved : {filename}  {data.shape}")
