@@ -66,6 +66,8 @@ BINARY_COLS = ["Passport", "OwnCar"]
 if os.getenv("MLFLOW_TRACKING_URI"):
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
 
+print(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
+
 try:
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 except Exception:
@@ -120,7 +122,7 @@ model_pipeline = Pipeline([
 param_grid = {
     "model__n_estimators"      : [100, 150, 200],
     "model__max_depth"         : [3, 4, 5],
-    "model__learning_rate"     : [0.01, 0.05],
+    "model__learning_rate"     : [0.01, 0.05, 0.1],
     "model__colsample_bytree"  : [0.6, 0.8],
     "model__colsample_bylevel" : [0.5, 0.7],
     "model__reg_lambda"        : [1.0, 1.5],
@@ -128,6 +130,13 @@ param_grid = {
 
 print("GridSearchCV with StratifiedKFold")
 cv_strategy = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+
+input_example = pd.DataFrame([{
+    col: (Xtrain[col].median()
+          if Xtrain[col].dtype in ['int64', 'float64']
+          else Xtrain[col].mode()[0])
+    for col in Xtrain.columns
+}])
 
 print("\n-- MLflow tracking --")
 with mlflow.start_run(run_name="xgb_gridsearch_parent") as parent_run:
@@ -225,8 +234,9 @@ with mlflow.start_run(run_name="xgb_gridsearch_parent") as parent_run:
     # Log model artifact to MLflow Registry
     mlflow.sklearn.log_model(
         sk_model=best_pipeline,
-        artifact_path="wellness_tourism_pipeline",
+        name="wellness_tourism_pipeline",
         registered_model_name="WellnessTourismPurchasePredictor",
+        input_example=input_example,
     )
     print(f"\nMLflow parent run ID : {parent_run.info.run_id}")
 
