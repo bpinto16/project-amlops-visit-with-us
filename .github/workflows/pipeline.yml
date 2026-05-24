@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Dependencies
-        run: pip install -r tourism_project/requirements.
+        run: pip install -r tourism_project/requirements.txt
       - name: Install pyngrok
         run: pip install pyngrok==7.2.12
       - name: Start MLflow Tracking Server
@@ -52,8 +52,6 @@ jobs:
             sleep 5
           done
       - name: Start ngrok tunnel and set tracking URI
-        env:
-          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
         run: |
           ngrok config add-authtoken $NGROK_TOKEN
           nohup ngrok http 5000 --log=stdout > /tmp/ngrok.log 2>&1 &
