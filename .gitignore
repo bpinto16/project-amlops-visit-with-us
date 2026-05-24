@@ -1,0 +1,8 @@
+mlruns/
+*.joblib
+*.pkl
+*.pickle
+__pycache__/
+.env
+*.pyc
+tourism_project/data/*.csv

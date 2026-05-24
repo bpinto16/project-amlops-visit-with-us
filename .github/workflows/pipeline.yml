@@ -5,6 +5,10 @@ on:
     branches:
       - main  # Automatically triggers on push to the main branch
 
+env:
+  MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+  ARTIFACT_STORE: ${{ github.workspace }}/mlartifacts
+
 jobs:
 
   register-dataset:
@@ -34,22 +38,38 @@ jobs:
   model-training:
     needs: data-prep
     runs-on: ubuntu-latest
-    env:
-      NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - name: Install Dependencies
         run: pip install -r tourism_project/requirements.txt
-      - name: Start MLflow Server
+      - name: Launch MLflow server on port 5000
         run: |
-          nohup mlflow ui --host 0.0.0.0 --port 5000 &  # Run MLflow UI in the background
-          sleep 5  # Wait for a moment to let the server starts
+          mkdir -p ${{ env.ARTIFACT_STORE }}
+          nohup mlflow server \
+            --host 127.0.0.1 \
+            --port 5000 \
+            --backend-store-uri sqlite:///mlflow.db \
+            --default-artifact-root ${{ env.ARTIFACT_STORE }} \
+            > mlflow.log 2>&1 &
+      - name: Wait until MLflow is healthy
+        run: |
+          timeout 60 bash -c \
+            'until curl -sf http://127.0.0.1:5000/health; do sleep 2; done'
+          echo "MLflow server is ready."
       - name: Model Building
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          MLFLOW_HTTP_REQUEST_HEADER_ngrok-skip-browser-warning: "true"
-        run: python tourism_project/model_building/train.py
-
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+        run: MLFLOW_TRACKING_URI=http://127.0.0.1:5000 python tourism_project/model_building/train.py
+      - name: Archive MLflow experiment data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-experiment-data
+          path: |
+            mlflow.db
+            ${{ env.ARTIFACT_STORE }}
+          retention-days: 30
 
   deploy-hosting:
     runs-on: ubuntu-latest
