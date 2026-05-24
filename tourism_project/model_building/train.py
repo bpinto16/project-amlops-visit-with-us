@@ -31,7 +31,7 @@ HF_DATASET_REPO  = "bpinto16/amlops-visit-with-us"
 HF_MODEL_REPO    = "bpinto16/wellness-tourism-mlflow-model"
 MODEL_FILENAME   = "best_wellness_mlflow_model.joblib"
 RANDOM_STATE     = 42
-MLFLOW_EXPERIMENT_NAME = "wellness-tourism-purchase-prediction"
+MLFLOW_EXPERIMENT_NAME = "wellness-tourism-prediction-experiment"
 
 # Classification threshold
 CLASSIFICATION_THRESHOLD = 0.40
@@ -137,6 +137,12 @@ input_example = pd.DataFrame([{
           else Xtrain[col].mode()[0])
     for col in Xtrain.columns
 }])
+
+INTEGER_COLS = [
+    "CityTier", "NumberOfPersonVisiting",
+    "Passport", "PitchSatisfactionScore", "OwnCar",
+]
+input_example[INTEGER_COLS] = input_example[INTEGER_COLS].astype("float64")
 
 print("\n-- MLflow tracking --")
 with mlflow.start_run(run_name="xgb_gridsearch_parent") as parent_run:
