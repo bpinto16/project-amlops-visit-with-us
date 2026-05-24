@@ -62,18 +62,20 @@ NUMERIC_COLS = [
 ]
 BINARY_COLS = ["Passport", "OwnCar"]
 
-# Configure MLflow Tracking Server
-if os.getenv("MLFLOW_TRACKING_URI"):
-    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+mlflow.set_tracking_uri("http://localhost:5000")
 
-print(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
+# # Configure MLflow Tracking Server
+# if os.getenv("MLFLOW_TRACKING_URI"):
+#     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
 
-try:
-    mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
-except Exception:
-    if not mlflow.get_experiment_by_name(MLFLOW_EXPERIMENT_NAME):
-        mlflow.create_experiment(MLFLOW_EXPERIMENT_NAME)
-    mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+# print(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
+
+# try:
+#     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+# except Exception:
+#     if not mlflow.get_experiment_by_name(MLFLOW_EXPERIMENT_NAME):
+#         mlflow.create_experiment(MLFLOW_EXPERIMENT_NAME)
+#     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
 # Enable automatic logging for hyperparameter tuning structures
 mlflow.sklearn.autolog(max_tuning_runs=None, log_models=False)
